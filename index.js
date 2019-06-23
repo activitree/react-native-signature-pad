@@ -1,12 +1,7 @@
-'use strict';
-
 import React, { Component } from 'react';
-import {
-  View,
-  WebView,
-  StyleSheet,
-} from 'react-native';
+import { StyleSheet, View, ViewPropTypes } from 'react-native';
 import PropTypes from 'prop-types';
+import { WebView } from 'react-native-webview';
 
 import htmlContent from './injectedHtml';
 import injectedSignaturePad from './injectedJavaScript/signaturePad';
@@ -14,14 +9,14 @@ import injectedApplication from './injectedJavaScript/application';
 import injectedErrorHandler from './injectedJavaScript/errorHandler';
 import injectedExecuteNativeFunction from './injectedJavaScript/executeNativeFunction';
 
-class SignaturePad extends Component {
+export default class SignaturePad extends Component {
 
   static propTypes = {
     defaultHeight: PropTypes.number,
     defaultWidth: PropTypes.number,
     onChange: PropTypes.func,
     onError: PropTypes.func,
-    style: PropTypes.object,
+    style: ViewPropTypes.style,
     penColor: PropTypes.string,
     dataURL: PropTypes.string,
   };
@@ -117,10 +112,16 @@ class SignaturePad extends Component {
 
   };
 
+  onMessage = (event) => {
+    var base64DataUrl = JSON.parse(event.nativeEvent.data);
+    this._bridged_finishedStroke(base64DataUrl);
+  }
+
   render = () => {
     return (
         <WebView automaticallyAdjustContentInsets={false}
                  onNavigationStateChange={this._onNavigationChange}
+                 onMessage={this.onMessage}
                  renderError={this._renderError}
                  renderLoading={this._renderLoading}
                  source={this.source}
@@ -130,5 +131,3 @@ class SignaturePad extends Component {
     )
   };
 }
-
-module.exports = SignaturePad;
